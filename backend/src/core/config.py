@@ -11,7 +11,7 @@ UPLOAD_DIR = BASE_DIR / "storage" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024              # 25 MB
-ALLOWED_EXTENSIONS = {"pdf", "jpg", "png"}
+ALLOWED_EXTENSIONS = {"pdf", "jpg", "png", "jpeg"}
 
 DATABASE_URL = f"sqlite:///{BASE_DIR/ 'bhoominetra.db'}"
 CORS_ORIGINS = [
