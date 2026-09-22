@@ -21,7 +21,8 @@ export default function DashboardPage() {
           </div>
         </div>
         <StatusCardsSkeleton />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <RecordListSkeleton />
           <RecordListSkeleton />
           <RecordListSkeleton />
         </div>
@@ -45,6 +46,7 @@ export default function DashboardPage() {
 
   const counts = data?.status_counts || {};
   const needsReview = data?.needs_review || [];
+  const autoApproved = data?.auto_approved || [];
   const verified = data?.verified || [];
 
   return (
@@ -70,17 +72,23 @@ export default function DashboardPage() {
       {/* Status Cards */}
       <StatusCards counts={counts} />
 
-      {/* Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Lists — same order as the status cards above */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <RecordList
           title="Needs Review"
-          records={needsReview.map((r) => ({ ...r, status: "needs_review" }))}
+          records={needsReview}
           emptyTitle="No records need review"
           emptyDescription="All caught up! Upload a new document to get started."
         />
         <RecordList
+          title="Auto Approved"
+          records={autoApproved}
+          emptyTitle="No auto-approved records"
+          emptyDescription="Records the system approves without review will appear here."
+        />
+        <RecordList
           title="Verified"
-          records={verified.map((r) => ({ ...r, status: "verified" }))}
+          records={verified}
           emptyTitle="No verified records yet"
           emptyDescription="Verified records will appear here after review."
         />

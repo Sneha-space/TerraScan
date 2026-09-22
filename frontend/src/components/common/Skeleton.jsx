@@ -36,8 +36,9 @@ export function RecordListSkeleton() {
         {[1, 2, 3].map((i) => (
           <div key={i} className="px-6 py-4 flex items-center justify-between">
             <div className="space-y-2 flex-1">
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-44" />
             </div>
             <Skeleton className="h-5 w-5 rounded" />
           </div>

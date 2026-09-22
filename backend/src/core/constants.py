@@ -20,6 +20,8 @@ EXPECTED_FIELDS = [
 CRITICAL_FIELDS = [
     "owner_name",
     "area",
+    "survey_number",
+    "khasra_number",
 ]
 
 CONFIDENCE_THRESHOLD = 0.8
