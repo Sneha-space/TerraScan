@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 
+from .base import BaseProcessor
 
-class CVProcessor:
+class CVProcessor(BaseProcessor):
     def process(self,images:list[np.ndarray])->list[np.ndarray]:
         image_list = []
         for image in images:
@@ -10,16 +11,7 @@ class CVProcessor:
             image = self.enhance(image)
             image_list.append(image)
         return image_list
-    def process_bytes(self, list_image_bytes: bytes) -> list[np.ndarray]:
-        images = []
-        for image_bytes in list_image_bytes:
-            image = np.frombuffer(image_bytes, dtype=np.uint8)
-            image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-
-            if image is None:
-                raise ValueError("Invalid image bytes")
-            images.append(image)
-        return images
+    
 
     def preprocess(self, image: np.ndarray) -> np.ndarray:
         gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)

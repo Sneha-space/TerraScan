@@ -1,39 +1,47 @@
 import os
-import cv2
+import numpy as np
+
+from .base import BaseProcessor
+from .image_loader import ImageLoader
 from .image_enhancer import CVProcessor
-from .image_processor import PaddleOCRProcessor,TextProcessor
-from .text_processor import LLMTextExtractor,RegexTextExtractor
-from ..utils.file_type_det import guess_file_type
-from ..services.pdf_to_img import extract_images_from_pdf
+from .ocr_service import IndicOCRProcessor
+from .text_processor import TextProcessor
+from .script_detector import ScriptDetector
+from .text_extractor import LLMTextExtractor,RegexRegistry
+from .transliterate import Transliterator
+from .validator_model import LandRecordExtraction
 from ..core.config import UPLOAD_DIR
 from ..services.ingest import save_document_results
-
 from ..core.session_maker import get_session,delete_session,stop_session
-class MlPipeline:
+
+
+class MlPipeline(BaseProcessor):
     def __init__(self):
-        self.guess_file_type = guess_file_type
-        self.extract_images_from_pdf = extract_images_from_pdf
+        self.image_loader = ImageLoader()
         self.cvprocessor = CVProcessor()
-        self.ocr_processor = PaddleOCRProcessor()
+        self.ocr_processor = IndicOCRProcessor()
+        self.script_detector = ScriptDetector()
         self.text_processor = TextProcessor()
-        self.text_extractor = RegexTextExtractor() # LLMTextExtractor("Qwen/Qwen3.5-4B")
-    def process(self,key:str):
+        self.re_registry = RegexRegistry()
+        self.llm_extractor = LLMTextExtractor("Qwen/Qwen3.5-4B")
+        self.transliterate = Transliterator()
+
+        self.re_registry._set_script_funcs(self.transliterate,self.script_detector)
+
+    def process(self,key:str,state:str="wb"):
         path = os.path.join(UPLOAD_DIR,key)
-        ftype = guess_file_type(path)
-        if ftype=="pdf":
-            list_image_bytes = self.extract_images_from_pdf(path)
-            images = self.cvprocessor.process_bytes(list_image_bytes)
-        elif ftype in ["png","jpg","jpeg"]:
-            images = [cv2.imread(path)]
-        else:
-            raise TypeError("File type should be pdf or image(png,jpg.jpeg)")
-        images = self.cvprocessor.process(images)
-        ocr_result = self.ocr_processor.process(images)
-        text_result = self.text_processor.process(ocr_result) #dict{text,low_confidence_text,confidence}
-        result = self.text_extractor.process(text_result["text"])
-        self.ingest_to_db(key,result,text_result["confidence"])
-        stop_session(key)
-        return result
+        images:np.ndarray = self.image_loader.process(path) #list[np.ndarray]
+        images:np.ndarray = self.cvprocessor.process(images) #list[np.ndarray]
+        result:list[dict] = self.ocr_processor.process(images) #[{markdown,json_layout},...]
+        text,blocks = self.text_processor.process(result)  # str,list[dict]->[{'conf','text'}]
+        script = self.script_detector.process(text)
+        records = self.re_registry.extract(text,blocks,script["primary_script"],state)
+        if records is None:
+            records = self.llm_extractor.process(text)
+        records = LandRecordExtraction.model_validate(records)
+        return records.dict()
+        # self.ingest_to_db(key,result,text_result["confidence"])
+        # stop_session(key)
     def ingest_to_db(self,key,result,confidence):
         session = get_session(key)
         doc_id = session["doc_id"]
@@ -65,5 +73,4 @@ def format_output(result,confidence)->list[list[dict]]:
         }
         output.append(info)
     return [output]
-
 
