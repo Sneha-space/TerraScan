@@ -1,57 +1,57 @@
-# BhoomiNetra Frontend
+# BhoomiNetra frontend
 
-Clean, minimalist hospital-style frontend for the BhoomiNetra land records backend.
+The officer's console: upload scanned khatians, see what the machine read, and check and
+verify the records it wasn't sure about.
 
-## Features
+React 18 + Vite + Tailwind 3. Icons from `lucide-react`. The Anek fonts (Latin, Bengali,
+Devanagari) ship inside the app, so they load without internet access.
 
-- Soft green + white medical theme
-- Fully connected to the backend API
-- Configurable base URL (easy to point to real backend later)
-- Upload land records (PDF / JPG / PNG)
-- Dashboard with status counts + review lists
-- Record review & verification with field editing
-
-## Quick Start
+## Run it
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Make sure the backend is running at http://127.0.0.1:8000
-
-# 3. Start the frontend
 npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:5173. The backend must be running at the address in `.env`
+(`VITE_API_BASE_URL`, default `http://127.0.0.1:8000`) — copy `.env.example` to `.env`
+to change it.
 
-## Configuration
+For something to look at, seed the backend with test data — see
+`backend/scratch/seed_dev_data.py`.
 
-All configurable values live in:
+## Screens
 
-- `.env` → `VITE_API_BASE_URL`
-- `src/config/index.js` → timeout, max file size, app name, etc.
+| Path | Screen |
+|---|---|
+| `/` | Overview: where records stand, machine accuracy, districts, oldest waiting |
+| `/review` | Review queue: records that need an officer, and why |
+| `/records` | Every record, filterable by status or by file (`?document=ID`) |
+| `/uploads` | Upload a file; every file and what happened to it |
+| `/records/:id` | Review one record beside its scan, correct either language, verify |
 
-When you move to the real/production backend, just change the value in `.env`.
-
-## Project Structure
+## Where things live
 
 ```
 src/
-├── api/            → Backend API calls
-├── components/     → Reusable UI pieces
-├── pages/          → Full screens
-├── hooks/          → Data fetching logic
-├── config/         → Easy-to-edit settings
-└── utils/          → Helpers (labels, colors…)
+  api/          client.js (axios, error messages), endpoints.js (one function per route)
+  hooks/        useApi.js — loading / error / data for one API call
+  components/
+    layout/     AppShell (sidebar, phone menu), PageHeader
+    common/     Button, StatusStamp, SearchField, loading / error / empty states
+    records/    RecordTable, Bilingual (value as written + English)
+    review/     LedgerRow (one field), ScanViewer
+    overview/   the overview panels
+    uploads/    FileDropzone
+  pages/        one file per screen
+  utils/        fields.js (labels, groups), format.js, script.js (which Indian script)
 ```
 
-## Backend Endpoints Used
+The API routes and their shapes are in `docs/frontend-api-guide.md`.
 
-| Method | Endpoint                     | Used In          |
-|--------|------------------------------|------------------|
-| GET    | /health                      | (optional)       |
-| POST   | /documents/upload            | Upload Page      |
-| GET    | /dashboard                   | Dashboard Page   |
-| GET    | /records/{id}                | Review Page      |
-| POST   | /records/{id}/verify         | Review Page      |
+## Design
+
+Colours come from land-record paperwork and are defined once in `tailwind.config.js`:
+register ink (`ink`), paper (`paper`), the red ink officers correct with (`correction` —
+also used for "needs review"), a seal green (`seal` — verified), and `machine` blue for
+records the machine approved. Never use a raw hex colour in a component; add a token.

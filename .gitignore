@@ -221,3 +221,6 @@ frontend/node_modules/
 frontend/.env
 backend/bhoominetra.db
 backend/storage/
+
+# LGD village list - too big for GitHub, each machine downloads it (see setup.md)
+backend/data/

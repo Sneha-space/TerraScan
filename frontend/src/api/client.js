@@ -1,27 +1,23 @@
 import axios from "axios";
 import config from "../config";
 
-// Central API client - all requests go through here
+// Central API client - every request goes through here
 const api = axios.create({
   baseURL: config.apiBaseUrl,
   timeout: config.timeout,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
-// Global error logging (helpful during development)
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const message =
-      error.response?.data?.detail ||
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong";
-    console.error("API Error:", message);
-    return Promise.reject(error);
+/**
+ * One readable sentence for a failed request, for showing on screen.
+ */
+export function errorMessage(error, fallback = "Something went wrong.") {
+  if (!error) return fallback;
+  if (!error.response) {
+    return `Couldn't reach the server at ${config.apiBaseUrl}. Check that the backend is running, then try again.`;
   }
-);
+  const detail = error.response.data?.detail;
+  if (typeof detail === "string") return detail;
+  return fallback;
+}
 
 export default api;

@@ -39,3 +39,19 @@ def save_bytes(data: bytes, extension: str) -> str:
     key = f"{uuid.uuid4()}.{extension}"
     (UPLOAD_DIR / key).write_bytes(data)
     return key
+
+
+def get_path(key: str) -> str:
+    """Where the file for this storage key lives on disk.
+
+    Args:
+        key: A storage key from the database, e.g. "3f2b1a9c-...-c9.pdf".
+
+    Returns:
+        The full path as a plain string, ready to open.
+    """
+
+    if not key:
+        raise ValueError("No key provided")
+
+    return str(UPLOAD_DIR / key)

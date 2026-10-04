@@ -1,48 +1,45 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { LoaderCircle } from "lucide-react";
 
-const variants = {
-  primary:
-    "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-transparent",
-  secondary:
-    "bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm",
-  danger:
-    "bg-rose-600 hover:bg-rose-700 text-white shadow-sm border border-transparent",
-  ghost: "bg-transparent hover:bg-gray-100 text-gray-600 border border-transparent",
+const VARIANTS = {
+  primary: "bg-ink text-white hover:bg-ink-hover border border-ink",
+  secondary: "bg-sheet text-ink border border-rule hover:border-ink-faint",
+  quiet: "bg-transparent text-ink-soft border border-transparent hover:text-ink hover:bg-rule-soft",
 };
 
-const sizes = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-sm",
-  lg: "px-5 py-2.5 text-base",
+const SIZES = {
+  sm: "h-8 px-3 text-sm gap-1.5",
+  md: "h-10 px-4 text-sm gap-2",
 };
 
+/**
+ * A button, or a link styled as one when `to` is given.
+ */
 export default function Button({
   children,
   variant = "primary",
   size = "md",
-  disabled = false,
   loading = false,
+  disabled = false,
+  to,
   className = "",
   type = "button",
-  onClick,
   ...props
 }) {
+  const classes = `inline-flex items-center justify-center whitespace-nowrap rounded-control font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`;
+
+  if (to) {
+    return (
+      <Link to={to} className={classes} {...props}>
+        {children}
+      </Link>
+    );
+  }
+
   return (
-    <button
-      type={type}
-      disabled={disabled || loading}
-      onClick={onClick}
-      className={`
-        inline-flex items-center justify-center gap-2 font-medium rounded-lg
-        transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${variants[variant]} ${sizes[size]} ${className}
-      `}
-      {...props}
-    >
-      {loading && (
-        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-      )}
+    <button type={type} disabled={disabled || loading} className={classes} {...props}>
+      {loading && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}
       {children}
     </button>
   );
