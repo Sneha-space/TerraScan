@@ -1,26 +1,3 @@
-# import cv2
-# from src.ml.image_enhancer import CVProcessor
-# from src.services.pdf_to_img import extract_images_from_pdf
-
-# # Initialize the processor (it automatically loads the AI model)
-# processor = CVProcessor(use_enhancement=True)
-
-# if __name__ == "__main__":
-#     # 1. Convert PDF pages to image bytes
-#     image_bytes = extract_images_from_pdf(r"c:\Users\sneha\Downloads\pgms vs nns-Sneha Biswas.pdf")
-    
-#     # 2. Decode bytes into OpenCV images
-#     images = processor.process_bytes(image_bytes)
-    
-#     # 3. Run Preprocessing + AI Enhancement
-#     enhanced_images = processor.process(images)
-    
-#     # 4. Display the resulting enhanced images
-#     for idx, image in enumerate(enhanced_images):
-#         cv2.imshow(f"Enhanced Page {idx+1}", image)
-#         cv2.waitKey(0)
-#     cv2.destroyAllWindows()
-
 """TerraScan API entry point.
 
 Creates the app and mounts routers. Business logic belongs in
@@ -31,6 +8,8 @@ Run from backend/:  uvicorn main:app --reload
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from src.workers.ml_worker import start_worker,stop_event
 
 from src.core.config import CORS_ORIGINS
 
@@ -44,8 +23,13 @@ import src.models  # noqa: F401, registers models with Base
 
 Base.metadata.create_all(bind=engine)
 
+@asynccontextmanager
+async def lifespan(app):
+    start_worker()
+    yield
+    stop_event.set()
 
-app = FastAPI(title="TerraScan API")
+app = FastAPI(title="TerraScan API",lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
