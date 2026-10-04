@@ -1,25 +1,18 @@
-// ============================================================
-// CONFIGURATION - Easy to change for the real/production model
-// ============================================================
-// All user-configurable values live here or in the .env file.
-// In the original model, users can simply edit .env or this file.
+// Settings that change between machines. The backend address comes from
+// .env (VITE_API_BASE_URL) so nobody has to edit code to point elsewhere.
 
 const config = {
-  // Backend base URL (change in .env for different environments)
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000",
 
-  // Request timeout in milliseconds
+  // request timeout in milliseconds
   timeout: 30000,
 
-  // Max file size in MB (matches backend limit)
+  // must match MAX_UPLOAD_BYTES in backend/src/core/config.py
   maxFileSizeMB: 25,
-
-  // Accepted file types
   acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
 
-  // App name (can be changed later)
-  appName: "BhoomiNetra",
-  appTagline: "Land Records Intelligence",
+  appName: "TerraScan",
+  appTagline: "Land record verification",
 };
 
 export default config;

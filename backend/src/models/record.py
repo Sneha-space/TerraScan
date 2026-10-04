@@ -28,4 +28,10 @@ class Record(Base):
     dedupe_key : Mapped[str | None] = mapped_column(index=True)
     status : Mapped[RecordStatus] = mapped_column(default=RecordStatus.needs_review)
 
+    # official LGD codes for the record's location, set by the LGD check at
+    # ingest. None = no match at that level (and so none below it either)
+    lgd_district_code : Mapped[int | None]
+    lgd_sub_district_code : Mapped[int | None]
+    lgd_village_code : Mapped[int | None]
+
     document : Mapped["Document"] = relationship()
